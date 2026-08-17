@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PsicoGest - Gestão para Profissionais de Psicologia</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <div id="app">
+      <nav id="navbar" class="navbar" style="display: none;">
+        <div class="nav-brand">PsicoGest</div>
+        <div class="nav-links">
+          <span id="nav-user-name"></span>
+          <button id="nav-logout" class="btn btn-secondary">Sair</button>
+        </div>
+      </nav>
+
+      <main id="main-content">
+        <div id="page-login" class="page"></div>
+        <div id="page-admin" class="page" style="display: none;"></div>
+        <div id="page-psychologist" class="page" style="display: none;"></div>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

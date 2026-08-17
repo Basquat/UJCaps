@@ -1,0 +1,240 @@
+﻿
+AV3 - PROJETO INTEGRADOR
+Plataforma de Gestão para Profissionais de Psicologia
+Desenvolvimento de produto de software com front-end, back-end em TypeScript e banco de dados MySQL
+Componente	Definição
+Disciplina	Desenvolvimento
+Modalidade	Projeto em grupo
+Avaliação	AV3
+Valor	10,0 pontos
+Produto	Aplicação web funcional para psicólogos
+Tecnologias obrigatórias	TypeScript no back-end e MySQL no banco de dados
+Entrega	Código, documentação e vídeo em formato de pitch
+
+DESAFIO CENTRAL: desenvolver um produto integrado e demonstrável que resolva necessidades reais de gestão de profissionais de Psicologia, preservando segurança, privacidade e controle de acesso.
+
+
+1. Contexto da atividade
+Profissionais de Psicologia atuam em diferentes contextos, como Psicologia Clínica, Organizacional e do Trabalho, Escolar e Educacional, Hospitalar, Social, Jurídica, do Esporte, do Trânsito, Neuropsicologia, pesquisa e docência. Apesar das diferenças entre essas áreas, muitos profissionais enfrentam dificuldades semelhantes na organização de usuários, clientes, pacientes, agenda, atendimentos, documentos e informações administrativas.
+Em muitos casos, os dados permanecem distribuídos em planilhas, agendas pessoais, aplicativos de mensagens e documentos isolados. Essa fragmentação aumenta o retrabalho, dificulta a consulta de informações, reduz a rastreabilidade das ações e pode gerar riscos de acesso indevido a dados pessoais e sensíveis.
+Nesta AV3, cada grupo atuará como uma equipe de desenvolvimento contratada para criar um produto de software voltado a psicólogos atuantes em qualquer área da Psicologia. O foco acadêmico é integrar os conhecimentos de front-end, back-end, API, autenticação, regras de negócio e banco de dados em uma solução única e funcional.
+2. Situação-problema
+Uma organização que reúne profissionais de Psicologia precisa substituir seus controles dispersos por um sistema web centralizado. Atualmente, não existe uma forma confiável de determinar quem pode acessar a plataforma, quais operações cada pessoa pode realizar ou quais informações foram alteradas. O cadastro de profissionais e clientes é repetido em diferentes arquivos, e a administração não consegue acompanhar claramente usuários ativos, inativos e bloqueados.
+A organização necessita de um sistema que possa ser utilizado por psicólogos de diferentes áreas, sem obrigar todos a seguirem um único modelo de atendimento. Ao mesmo tempo, precisa manter uma administração central capaz de cadastrar usuários, conceder ou retirar acessos, acompanhar registros e executar as operações autorizadas do sistema.
+
+PROBLEMA A RESOLVER: como desenvolver uma plataforma segura, organizada e flexível que centralize a gestão dos profissionais de Psicologia e de seus clientes ou pacientes, com controle de acesso, persistência em MySQL e integração completa entre front-end e back-end?
+
+3. Proposta do produto de software
+O grupo deverá desenvolver uma aplicação web responsiva para gestão de profissionais de Psicologia. A solução deverá possuir autenticação, perfis de acesso, painel administrativo, cadastro de profissionais, cadastro de clientes ou pacientes e registro das principais operações do sistema.
+O produto poderá receber um nome e uma identidade visual criados pelo grupo. A equipe deverá demonstrar qual aspecto da solução é inovador ou oferece valor superior a controles manuais e ferramentas genéricas.
+4. Objetivos de aprendizagem
+    • Planejar e desenvolver um produto de software a partir de uma situação-problema.
+    • Construir um back-end com Node.js e TypeScript.
+    • Modelar e implementar um banco de dados relacional MySQL.
+    • Criar uma interface web responsiva e integrada à API.
+    • Implementar autenticação, autorização e perfis de acesso.
+    • Aplicar operações CRUD com validação e persistência.
+    • Documentar arquitetura, banco, API, instalação e uso.
+    • Apresentar o produto de forma objetiva por meio de um pitch em vídeo.
+5. Perfis de acesso
+Perfil	Responsabilidades e limites
+Administrador	Gerencia usuários, perfis, permissões e cadastros; ativa, bloqueia e libera acessos; consulta os módulos e pode executar as operações administrativas e operacionais previstas. Não pode visualizar senhas em texto puro nem remover registros de auditoria.
+Psicólogo	Acessa o próprio painel e os clientes ou pacientes vinculados; consulta e atualiza informações permitidas; utiliza as funcionalidades profissionais definidas pelo grupo.
+Atendente/Usuário administrativo — opcional	Realiza cadastros e consultas administrativas autorizadas, sem acesso a informações restritas definidas pelo grupo.
+
+O administrador terá a maior abrangência funcional do sistema, porém deverá respeitar regras técnicas de segurança. Senhas devem ser protegidas por hash e nunca podem ser consultadas. Ações críticas devem ser registradas.
+6. Escopo funcional mínimo
+6.1 Autenticação e acesso
+    • Tela de login com e-mail e senha.
+    • Logout e proteção das rotas internas.
+    • Senha armazenada com hash seguro.
+    • Identificação do perfil após o login.
+    • Redirecionamento ao painel correspondente.
+    • Mensagens adequadas para credenciais inválidas e acesso negado.
+6.2 Painel do administrador
+    • Exibir quantidade de usuários, psicólogos e clientes/pacientes.
+    • Listar usuários por situação: ativo, inativo ou bloqueado.
+    • Cadastrar, consultar, editar, ativar, bloquear e liberar usuários.
+    • Definir o perfil de acesso de cada usuário.
+    • Cadastrar e gerenciar psicólogos.
+    • Cadastrar e gerenciar clientes ou pacientes.
+    • Consultar registros de ações relevantes.
+    • Acessar as demais operações do sistema conforme a regra de administrador geral.
+6.3 Área do psicólogo
+    • Visualizar e atualizar o próprio perfil.
+    • Consultar clientes ou pacientes vinculados.
+    • Cadastrar e atualizar informações permitidas.
+    • Pesquisar e filtrar registros.
+    • Visualizar um painel resumido com indicadores escolhidos pelo grupo.
+6.4 Gestão de clientes ou pacientes
+    • Cadastrar nome, contato, data de nascimento e demais dados administrativos definidos pelo grupo.
+    • Consultar, editar, ativar e inativar registros.
+    • Pesquisar por nome e filtrar por situação.
+    • Vincular o cliente ou paciente a um psicólogo.
+    • Impedir acesso não autorizado aos dados.
+6.5 Funcionalidade de inovação
+Cada grupo deverá implementar pelo menos uma funcionalidade adicional que gere valor para psicólogos de uma ou mais áreas. A inovação deve funcionar no produto e ser explicada no pitch.
+    • painel de indicadores e acompanhamento administrativo;
+    • agenda com confirmação de atendimento;
+    • lembretes e notificações internas;
+    • organização de documentos;
+    • formulários configuráveis por área de atuação;
+    • relatórios administrativos;
+    • recurso de acessibilidade ou melhoria da experiência;
+    • outra proposta aprovada pelo professor.
+7. Requisitos técnicos obrigatórios
+Camada	Requisito
+Front-end	Aplicação web responsiva. Pode utilizar HTML, CSS e TypeScript ou framework aprovado pelo professor.
+Back-end	Node.js com TypeScript; organização em rotas/controladores, serviços e acesso a dados; API REST.
+Banco	MySQL com script SQL, chaves primárias e estrangeiras, restrições e dados fictícios para demonstração.
+Integração	Front-end deve consumir a API; as operações principais precisam persistir e consultar dados reais no MySQL.
+Segurança	Hash de senha, autenticação, autorização no back-end, validação de entrada e uso de variáveis de ambiente.
+Qualidade	Código versionado, tratamento de erros, nomenclatura coerente e testes mínimos automatizados.
+
+8. Modelo mínimo de dados
+O modelo poderá ser ampliado, mas deverá possuir ao menos as seguintes entidades:
+Entidade	Finalidade mínima
+usuarios	Credenciais, nome, e-mail, situação e vínculo com perfil.
+perfis	Administrador, psicólogo e outros perfis definidos.
+psicologos	Dados profissionais e área de atuação.
+clientes_pacientes	Dados administrativos dos clientes ou pacientes.
+vinculos	Associação entre psicólogo e cliente/paciente, se não for representada diretamente.
+logs_acoes	Registro de operações relevantes, autor e data/hora.
+entidade_inovacao	Tabela necessária para a funcionalidade inovadora do grupo.
+
+
+ATENÇÃO: o arquivo SQL deverá criar o banco, as tabelas, os relacionamentos e dados fictícios. O sistema deve funcionar após seguir as instruções de instalação entregues pelo grupo.
+
+9. API mínima sugerida
+Método	Rota	Objetivo
+POST	/api/auth/login	Autenticar usuário.
+POST	/api/auth/logout	Encerrar sessão ou invalidar token.
+GET	/api/users	Listar usuários — administrador.
+POST	/api/users	Cadastrar usuário — administrador.
+PATCH	/api/users/:id	Atualizar dados, perfil ou situação.
+GET	/api/psychologists	Listar psicólogos autorizados.
+POST	/api/psychologists	Cadastrar psicólogo.
+GET	/api/patients	Listar clientes ou pacientes autorizados.
+POST	/api/patients	Cadastrar cliente ou paciente.
+GET	/api/patients/:id	Consultar registro autorizado.
+PATCH	/api/patients/:id	Atualizar registro autorizado.
+GET	/api/audit-logs	Consultar ações — administrador.
+
+As rotas poderão ser adaptadas, desde que estejam documentadas e mantenham coerência entre front-end, back-end e banco de dados.
+10. Regras de negócio essenciais
+    1. Somente usuário autenticado pode acessar páginas internas.
+    2. Somente administrador pode ativar, bloquear ou liberar usuários e alterar perfis.
+    3. Nenhum usuário pode elevar a própria permissão.
+    4. Senhas nunca podem ser exibidas ou armazenadas em texto puro.
+    5. Psicólogos visualizam somente informações permitidas e registros vinculados, conforme a solução do grupo.
+    6. A autorização deve ser validada no back-end, mesmo que o botão esteja oculto no front-end.
+    7. Exclusões relevantes devem ser evitadas; prefira inativação quando houver necessidade de histórico.
+    8. Cadastros e alterações devem ser validados antes da gravação no MySQL.
+    9. Erros devem gerar respostas compreensíveis sem expor detalhes internos ou credenciais.
+    10. Todos os dados de demonstração devem ser fictícios.
+11. Entregáveis obrigatórios
+Entrega	Conteúdo
+1. Produto de software	Front-end, back-end TypeScript, banco MySQL e integração funcional.
+2. Repositório	Código organizado, histórico de commits e arquivo README.
+3. Banco de dados	DER, dicionário de dados, schema.sql, relacionamentos e seed fictício.
+4. Documentação	Contexto, requisitos, casos de uso, arquitetura, API, instalação, testes e manual do usuário.
+5. Evidências	Capturas de tela, resultados de testes e demonstração dos fluxos principais.
+6. Vídeo-pitch	Apresentação do problema, solução, inovação e demonstração, com pelo menos dois alunos falando.
+
+12. Estrutura mínima da documentação
+    • Capa com disciplina, título, turma, integrantes e data.
+    • Resumo do produto.
+    • Contexto e situação-problema.
+    • Objetivo geral e objetivos específicos.
+    • Público-alvo e perfis de acesso.
+    • Requisitos funcionais e não funcionais.
+    • Regras de negócio.
+    • Casos de uso ou histórias de usuário.
+    • Arquitetura da solução e tecnologias utilizadas.
+    • Diagrama entidade-relacionamento e dicionário de dados.
+    • Descrição das rotas da API.
+    • Telas e fluxo de navegação.
+    • Procedimento de instalação e execução.
+    • Plano e resultados dos testes.
+    • Descrição da inovação.
+    • Conclusão, limitações e possíveis melhorias.
+    • Referências utilizadas.
+13. Vídeo em formato de pitch
+O grupo deverá entregar um vídeo curto e objetivo apresentando o produto como uma solução que poderia ser demonstrada a um cliente, investidor ou avaliador técnico. Pelo menos dois estudantes do grupo deverão aparecer ou participar com voz identificável, explicando partes diferentes do trabalho. Segue um exemplo de montagem da estrutura do vídeo pitch.
+Parte	Conteúdo esperado
+Abertura	Nome do produto, integrantes e frase de impacto.
+Problema	Dificuldade real enfrentada por profissionais de Psicologia.
+Solução	Como o sistema resolve o problema e para quem foi criado.
+Demonstração	Login, painel administrativo, gestão de acesso, cadastro e funcionalidade inovadora.
+Tecnologia	TypeScript no back-end, API, MySQL e integração com o front-end.
+Inovação	Diferencial do produto e valor gerado ao público-alvo.
+Encerramento	Resultados alcançados, limitações e próximos passos.
+
+ORIENTAÇÃO: o vídeo deve demonstrar o sistema funcionando. Apenas ler slides ou exibir telas estáticas não comprova a entrega do produto.
+
+14. Critérios de avaliação — 10,0 pontos
+14.1 Produto completo — 5,0 pontos
+Critério	Pontos	Evidência esperada
+Front-end e experiência	1,20	Telas completas, responsivas, coerentes, com validação e estados de interação.
+Back-end em TypeScript	1,30	API funcional, organização do código, regras, autenticação, autorização e erros.
+Banco MySQL	1,00	Modelagem, SQL, relacionamentos, integridade, seed e persistência real.
+Integração completa	1,00	Fluxos executados de ponta a ponta entre interface, API e banco.
+Inovação e qualidade	0,50	Funcionalidade adicional funcionando, segurança básica, versionamento e acabamento.
+
+14.2 Documentação e vídeo-pitch — 5,0 pontos
+Critério	Pontos	Evidência esperada
+Documentação do problema e requisitos	0,70	Contexto, situação-problema, objetivos, requisitos, regras e escopo.
+Documentação técnica	1,00	Arquitetura, tecnologias, API, integração e organização do projeto.
+Banco, instalação e testes	0,80	DER, dicionário, SQL, instruções reproduzíveis e evidências de testes.
+Manual e qualidade textual	0,50	Fluxos de uso, imagens, clareza, organização e revisão textual.
+Pitch: problema, solução e inovação	0,80	Argumentação clara, valor do produto e participação mínima de dois alunos.
+Pitch: demonstração e comunicação	0,70	Sistema funcionando, domínio técnico, objetividade, áudio e imagem compreensíveis.
+Coerência entre produto, documento e vídeo	0,50	As três entregas apresentam a mesma solução e funcionalidades.
+
+15. Níveis de desempenho
+Nível	Descrição
+Excelente	Entrega funcional, integrada, segura e bem documentada; inovação demonstrada; domínio técnico evidente.(8,1-10)
+Bom	Fluxos principais funcionam; pequenas falhas não comprometem a solução; documentação suficiente. (5,1-8)
+Parcial	Há componentes implementados, mas integração, persistência, segurança ou documentação estão incompletas. (3,1-5)
+Insuficiente	Predominam telas estáticas, código não executável, ausência de MySQL, ausência de integração ou falta de evidências. (0-3)
+
+16. Condições e penalizações
+    • Tela estática sem integração não será considerada funcionalidade completa.
+    • CRUD que não persiste no MySQL não receberá pontuação integral.
+    • Back-end desenvolvido sem TypeScript não atenderá ao requisito tecnológico da atividade.
+    • Senha armazenada ou exibida em texto puro caracteriza falha grave de segurança.
+    • Uso de dados reais de pacientes é proibido; utilizem dados inteiramente fictícios.
+    • Código copiado sem compreensão ou sem identificação das fontes poderá ser submetido às regras acadêmicas da instituição.
+    • A ausência do vídeo ou da documentação elimina a pontuação correspondente à entrega ausente.
+    • Vídeo sem participação mínima de dois alunos não atende integralmente ao critério solicitado.
+    • Obrigatório a entrega de relatório contendo a função de cada um na equipe de desenvolvimento e sua atuação durante todo o projeto. Alunos não listados no relatório, receberá nota zero.
+    • Entrega incompleta receberá nota parcial e Entrega fora do proza receberá nota zero.
+    • Grupos formados com mais de 5 alunos serão penalizados com um aluno recebendo nota zero e os demais perderão 2 pontos na atividade AV3.
+17. Organização sugerida do projeto
+Etapa	Atividade principal	Resultado
+1	Compreender o problema e definir inovação.	Escopo e requisitos.
+2	Modelar telas, API e banco.	Protótipo, rotas e DER.
+3	Criar MySQL e back-end TypeScript.	Persistência e API testada.
+4	Desenvolver o front-end.	Telas consumindo a API.
+5	Integrar e testar.	Fluxos ponta a ponta.
+6	Documentar e gravar o pitch.	Pacote final de entrega.
+
+18. Checklist final do grupo
+    • ☐ O sistema inicia seguindo o README.
+    • ☐ O arquivo SQL cria e popula o banco MySQL.
+    • ☐ O login diferencia administrador e psicólogo.
+    • ☐ O administrador gerencia acessos e executa as operações previstas.
+    • ☐ As permissões são verificadas no back-end.
+    • ☐ O cadastro de clientes/pacientes persiste no banco.
+    • ☐ O front-end consome dados reais da API.
+    • ☐ A funcionalidade inovadora está implementada e demonstrável.
+    • ☐ Senhas estão protegidas e segredos não estão no repositório.
+    • ☐ Os testes essenciais foram executados.
+    • ☐ A documentação contém todos os itens solicitados.
+    • ☐ O vídeo mostra o sistema e possui pelo menos dois alunos falando.
+    • ☐ Produto, documentação e pitch apresentam a mesma solução.
+19. Questão norteadora da AV3
+QUESTÃO: como a aplicação integrada de TypeScript, API web e banco de dados MySQL pode transformar um problema real dos profissionais de Psicologia em um produto de software seguro, funcional, administrável e inovador?
+
+20. Resultado esperado
+Ao final da AV3, o grupo deverá apresentar um produto executável e coerente, no qual seja possível realizar login, acessar o painel adequado, administrar permissões, cadastrar e consultar profissionais e clientes ou pacientes, persistir informações no MySQL e demonstrar uma funcionalidade inovadora. A entrega deverá evidenciar não apenas programação, mas também capacidade de compreender um problema, projetar uma solução, integrar tecnologias, documentar decisões e comunicar o valor do produto.
