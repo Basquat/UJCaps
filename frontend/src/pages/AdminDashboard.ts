@@ -1,4 +1,13 @@
-import { auth, getDemoUsers as getDemoUsersRaw, saveDemoUsers, perfilIdFromNome } from '@/services/auth';
+import {
+  auth,
+  getDemoUsers as getDemoUsersRaw,
+  saveDemoUsers,
+  perfilIdFromNome,
+  getDemoPsychologists,
+  getDemoPatients,
+  getDemoLogs,
+  registrarLogDemo,
+} from '@/services/auth';
 import { userService, psychologistService, patientService, auditService } from '@/services/api';
 import type { Usuario, Psicologo, ClientePaciente, LogAcao } from '@/types';
 
@@ -11,18 +20,6 @@ function getDemoUsers(): Usuario[] {
     perfilNome: u.perfilNome,
     situacao: u.situacao,
   }));
-}
-
-function getDemoPsychologists(): Psicologo[] {
-  const raw = localStorage.getItem('psico_demo_psychologists');
-  if (!raw) return [];
-  return JSON.parse(raw);
-}
-
-function getDemoPatients(): ClientePaciente[] {
-  const raw = localStorage.getItem('psico_demo_patients');
-  if (!raw) return [];
-  return JSON.parse(raw);
 }
 
 export async function renderAdminDashboard(usuario: Usuario): Promise<void> {
@@ -56,8 +53,16 @@ export async function renderAdminDashboard(usuario: Usuario): Promise<void> {
         <button id="btn-novo-usuario" class="btn btn-primary">Novo Usuário</button>
       </div>
 
-      <div id="usuarios-container" class="table-container">
+      <div id="usuarios-container" class="table-container" style="margin-bottom: 2rem;">
         <p style="padding: 1rem; color: var(--text-dim);">Carregando usuários...</p>
+      </div>
+
+      <div class="header-actions">
+        <h2 class="section-title" style="margin-bottom: 0;">Psicólogos</h2>
+      </div>
+
+      <div id="psicologos-container" class="table-container">
+        <p style="padding: 1rem; color: var(--text-dim);">Carregando psicólogos...</p>
       </div>
     </div>
   `;
@@ -68,6 +73,7 @@ export async function renderAdminDashboard(usuario: Usuario): Promise<void> {
 
   await carregarEstatisticas();
   await carregarUsuarios();
+  await carregarPsicologos();
 }
 
 async function carregarEstatisticas(): Promise<void> {
@@ -264,6 +270,168 @@ async function carregarUsuarios(): Promise<void> {
   }
 }
 
+async function carregarPsicologos(): Promise<void> {
+  const container = document.getElementById('psicologos-container')!;
+
+  let psicologos: Psicologo[];
+  let usandoDemo = false;
+  try {
+    psicologos = await psychologistService.listarPsicologos();
+  } catch {
+    psicologos = getDemoPsychologists();
+    usandoDemo = true;
+  }
+
+  let pacientes: ClientePaciente[];
+  try {
+    pacientes = usandoDemo ? getDemoPatients() : await patientService.listarPacientes();
+  } catch {
+    pacientes = getDemoPatients();
+  }
+
+  if (psicologos.length === 0) {
+    container.innerHTML = '<p style="padding: 1rem; color: var(--text-dim);">Nenhum psicólogo cadastrado.</p>';
+    return;
+  }
+
+  const rows = psicologos
+    .map((p) => {
+      const vinculados = pacientes.filter((pac) => pac.psicologoId === p.id).length;
+      return `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.areaAtuacao || '-'}</td>
+          <td>${p.crm || '-'}</td>
+          <td>${vinculados}</td>
+          <td><span class="badge badge-${p.situacao === 'ativo' ? 'success' : 'danger'}">${p.situacao}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary btn-ver-detalhes" data-id="${p.id}">Ver detalhes</button>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Área</th>
+          <th>CRM</th>
+          <th>Pacientes</th>
+          <th>Situação</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  container.querySelectorAll('.btn-ver-detalhes').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = Number((btn as HTMLElement).dataset.id);
+      const psicologo = psicologos.find((p) => p.id === id);
+      if (psicologo) abrirDetalhesPsicologo(psicologo, pacientes, usandoDemo);
+    });
+  });
+}
+
+async function abrirDetalhesPsicologo(psicologo: Psicologo, pacientes: ClientePaciente[], usandoDemo: boolean): Promise<void> {
+  const meusPacientes = pacientes.filter((p) => p.psicologoId === psicologo.id);
+
+  let logs: LogAcao[];
+  if (usandoDemo) {
+    logs = getDemoLogs().filter((l) => l.usuarioId === psicologo.usuarioId);
+  } else {
+    try {
+      const todosLogs = await auditService.listarLogs();
+      logs = todosLogs.filter((l) => l.usuarioId === psicologo.usuarioId);
+    } catch {
+      logs = [];
+    }
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'modal-detalhes-psicologo';
+  modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem;';
+
+  const pacientesRows = meusPacientes.length
+    ? meusPacientes
+        .map(
+          (p) => `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.telefone || '-'}</td>
+          <td><span class="badge badge-${p.situacao === 'ativo' ? 'success' : 'warning'}">${p.situacao}</span></td>
+        </tr>
+      `
+        )
+        .join('')
+    : '<tr><td colspan="3" style="color: var(--text-dim);">Nenhum paciente vinculado.</td></tr>';
+
+  const logsRows = logs.length
+    ? logs
+        .map(
+          (l) => `
+        <tr>
+          <td>${new Date(l.dataHora).toLocaleString('pt-BR')}</td>
+          <td>${l.acao}</td>
+          <td>${l.entidade}${l.entidadeId ? ' #' + l.entidadeId : ''}</td>
+        </tr>
+      `
+        )
+        .join('')
+    : '<tr><td colspan="3" style="color: var(--text-dim);">Nenhuma atividade registrada.</td></tr>';
+
+  modal.innerHTML = `
+    <div class="card" style="max-width: 720px; max-height: 85vh; overflow-y: auto;">
+      <h2 style="margin-bottom: 0.25rem;">${psicologo.nome}</h2>
+      <p style="color: var(--text-faint); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1.5rem;">
+        ${psicologo.areaAtuacao || 'Área não informada'} ${psicologo.crm ? '· ' + psicologo.crm : ''}
+      </p>
+
+      <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+        <div class="stat-card">
+          <h3>Telefone</h3>
+          <div class="stat-value" style="font-size: 1.1rem;">${psicologo.telefone || '-'}</div>
+        </div>
+        <div class="stat-card">
+          <h3>E-mail</h3>
+          <div class="stat-value" style="font-size: 1.1rem;">${psicologo.email || '-'}</div>
+        </div>
+      </div>
+
+      <h3 class="section-title" style="font-size: 0.9375rem;">Pacientes vinculados</h3>
+      <div class="table-container" style="margin-bottom: 1.5rem;">
+        <table>
+          <thead><tr><th>Nome</th><th>Telefone</th><th>Situação</th></tr></thead>
+          <tbody>${pacientesRows}</tbody>
+        </table>
+      </div>
+
+      <h3 class="section-title" style="font-size: 0.9375rem;">Atividade registrada</h3>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Data/Hora</th><th>Ação</th><th>Entidade</th></tr></thead>
+          <tbody>${logsRows}</tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" id="modal-fechar">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector('#modal-fechar')!.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+}
+
 async function alterarSituacao(id: number, situacao: string): Promise<void> {
   try {
     await userService.atualizarUsuario(id, { situacao: situacao as Usuario['situacao'] });
@@ -280,8 +448,14 @@ async function alterarSituacaoDemo(id: number, situacao: string): Promise<void> 
   if (idx === -1) return;
   users[idx].situacao = situacao as Usuario['situacao'];
   saveDemoUsers(users);
+
+  const admin = auth.getUsuario();
+  const acao = situacao === 'ativo' ? 'Cadastro autorizado' : situacao === 'bloqueado' ? 'Usuário bloqueado' : 'Situação alterada';
+  registrarLogDemo(admin?.id ?? 0, admin?.nome ?? 'Administrador', `${acao} (${users[idx].nome})`, 'Usuario', id);
+
   await carregarUsuarios();
   await carregarEstatisticas();
+  await carregarPsicologos();
 }
 
 function openUsuarioModal(id?: number): void {

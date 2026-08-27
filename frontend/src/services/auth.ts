@@ -1,11 +1,13 @@
 import { authService } from './api';
-import type { LoginRequest, LoginResponse, Usuario, ClientePaciente } from '@/types';
+import type { LoginRequest, LoginResponse, Usuario, ClientePaciente, Psicologo, LogAcao } from '@/types';
 
 const STORAGE_KEYS = {
   TOKEN: 'token',
   USUARIO: 'usuario',
   DEMO_USERS: 'psico_demo_users',
   DEMO_PATIENTS: 'psico_demo_patients',
+  DEMO_PSYCHOLOGISTS: 'psico_demo_psychologists',
+  DEMO_LOGS: 'psico_demo_logs',
 };
 
 function hashSenha(senha: string): string {
@@ -33,13 +35,41 @@ export function saveDemoUsers(users: DemoUser[]): void {
   localStorage.setItem(STORAGE_KEYS.DEMO_USERS, JSON.stringify(users));
 }
 
-function getDemoPatients(): ClientePaciente[] {
+export function getDemoPatients(): ClientePaciente[] {
   const raw = localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS);
   return raw ? JSON.parse(raw) : [];
 }
 
-function saveDemoPatients(patients: ClientePaciente[]): void {
+export function saveDemoPatients(patients: ClientePaciente[]): void {
   localStorage.setItem(STORAGE_KEYS.DEMO_PATIENTS, JSON.stringify(patients));
+}
+
+export function getDemoPsychologists(): Psicologo[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export function saveDemoPsychologists(psicologos: Psicologo[]): void {
+  localStorage.setItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS, JSON.stringify(psicologos));
+}
+
+export function getDemoLogs(): LogAcao[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_LOGS);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export function registrarLogDemo(usuarioId: number, usuarioNome: string, acao: string, entidade: string, entidadeId?: number): void {
+  const logs = getDemoLogs();
+  logs.unshift({
+    id: logs.length ? Math.max(...logs.map((l) => l.id)) + 1 : 1,
+    usuarioId,
+    usuarioNome,
+    acao,
+    entidade,
+    entidadeId,
+    dataHora: new Date().toISOString(),
+  });
+  localStorage.setItem(STORAGE_KEYS.DEMO_LOGS, JSON.stringify(logs));
 }
 
 function ensureDemoData(): void {
@@ -49,12 +79,24 @@ function ensureDemoData(): void {
       { id: 2, nome: 'Psicólogo Demo', email: 'psicologo@demo.com', senha: hashSenha('psicologo123'), perfilNome: 'Psicólogo', situacao: 'ativo' },
     ]);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS)) {
-    saveDemoPatients([
-      { id: 1, nome: 'Paciente Demo', telefone: '(11) 99999-9999', dataNascimento: '1990-01-01', email: 'paciente@demo.com', situacao: 'ativo', psicologoId: 2 },
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS)) {
+    saveDemoPsychologists([
+      { id: 1, usuarioId: 2, nome: 'Psicólogo Demo', crm: 'CRP 06/123456', areaAtuacao: 'Terapia Cognitivo-Comportamental', telefone: '(11) 98888-7777', email: 'psicologo@demo.com', situacao: 'ativo' },
     ]);
   }
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS)) {
+    saveDemoPatients([
+      { id: 1, nome: 'Paciente Demo', telefone: '(11) 99999-9999', dataNascimento: '1990-01-01', email: 'paciente@demo.com', situacao: 'ativo', psicologoId: 1 },
+    ]);
+  }
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_LOGS)) {
+    localStorage.setItem(STORAGE_KEYS.DEMO_LOGS, JSON.stringify([
+      { id: 1, usuarioId: 2, usuarioNome: 'Psicólogo Demo', acao: 'Paciente cadastrado', entidade: 'ClientePaciente', entidadeId: 1, dataHora: new Date(Date.now() - 86400000).toISOString() },
+    ]));
+  }
 }
+
+export { ensureDemoData };
 
 export const auth = {
   getToken(): string | null {
@@ -100,6 +142,7 @@ export const auth = {
     const usuario: Usuario = { id: user.id, nome: user.nome, email: user.email, perfilId: perfilIdFromNome(user.perfilNome), perfilNome: user.perfilNome, situacao: user.situacao };
     localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
+    registrarLogDemo(usuario.id, usuario.nome, 'Login realizado', 'Usuario', usuario.id);
     return { token, usuario };
   },
 
@@ -130,6 +173,12 @@ export const auth = {
   },
 
   async logout(): Promise<void> {
-    await authService.logout();
+    try {
+      await authService.logout();
+    } catch {
+      // Sem back-end disponível (modo demo): a sessão local ainda deve ser encerrada.
+    }
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USUARIO);
   },
 };

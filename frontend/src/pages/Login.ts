@@ -1,22 +1,8 @@
-import { auth } from '@/services/auth';
-import type { LoginRequest, Usuario } from '@/types';
-
-const STORAGE_KEYS = {
-  TOKEN: 'token',
-  USUARIO: 'usuario',
-  DEMO_PATIENTS: 'psico_demo_patients',
-};
-
-function ensureDemoPatients(): void {
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS)) {
-    localStorage.setItem(STORAGE_KEYS.DEMO_PATIENTS, JSON.stringify([
-      { id: 1, nome: 'Paciente Demo', telefone: '(11) 99999-9999', dataNascimento: '1990-01-01', email: 'paciente@demo.com', situacao: 'ativo', psicologoId: 999 },
-    ]));
-  }
-}
+import { auth, ensureDemoData } from '@/services/auth';
+import type { Usuario } from '@/types';
 
 export function renderLogin(): void {
-  ensureDemoPatients();
+  ensureDemoData();
   const container = document.getElementById('page-login')!;
   container.innerHTML = `
     <div class="card">
