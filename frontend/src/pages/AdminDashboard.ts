@@ -1,15 +1,13 @@
-import { auth } from '@/services/auth';
+import { auth, getDemoUsers as getDemoUsersRaw, saveDemoUsers, perfilIdFromNome } from '@/services/auth';
 import { userService, psychologistService, patientService, auditService } from '@/services/api';
 import type { Usuario, Psicologo, ClientePaciente, LogAcao } from '@/types';
 
 function getDemoUsers(): Usuario[] {
-  const raw = localStorage.getItem('psico_demo_users');
-  if (!raw) return [];
-  const parsed = JSON.parse(raw);
-  return parsed.map((u: { id: number; nome: string; email: string; perfilNome: string; situacao: Usuario['situacao'] }) => ({
+  return getDemoUsersRaw().map((u) => ({
     id: u.id,
     nome: u.nome,
     email: u.email,
+    perfilId: perfilIdFromNome(u.perfilNome),
     perfilNome: u.perfilNome,
     situacao: u.situacao,
   }));
@@ -84,13 +82,14 @@ async function carregarEstatisticas(): Promise<void> {
     const ativos = usuarios.filter((u) => u.situacao === 'ativo').length;
     const inativos = usuarios.filter((u) => u.situacao === 'inativo').length;
     const bloqueados = usuarios.filter((u) => u.situacao === 'bloqueado').length;
+    const pendentes = usuarios.filter((u) => u.situacao === 'pendente').length;
 
     container.innerHTML = `
       <div class="stat-card">
         <h3>Total de Usuários</h3>
         <div class="stat-value">${usuarios.length}</div>
         <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
-          ${ativos} ativos, ${inativos} inativos, ${bloqueados} bloqueados
+          ${ativos} ativos, ${pendentes} pendentes, ${inativos} inativos, ${bloqueados} bloqueados
         </p>
       </div>
       <div class="stat-card">
@@ -115,13 +114,14 @@ async function carregarEstatisticas(): Promise<void> {
     const ativos = usuarios.filter((u) => u.situacao === 'ativo').length;
     const inativos = usuarios.filter((u) => u.situacao === 'inativo').length;
     const bloqueados = usuarios.filter((u) => u.situacao === 'bloqueado').length;
+    const pendentes = usuarios.filter((u) => u.situacao === 'pendente').length;
 
     container.innerHTML = `
       <div class="stat-card">
         <h3>Total de Usuários</h3>
         <div class="stat-value">${usuarios.length}</div>
         <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
-          ${ativos} ativos, ${inativos} inativos, ${bloqueados} bloqueados
+          ${ativos} ativos, ${pendentes} pendentes, ${inativos} inativos, ${bloqueados} bloqueados
         </p>
       </div>
       <div class="stat-card">
@@ -163,7 +163,9 @@ async function carregarUsuarios(): Promise<void> {
           <td>${u.perfilNome || '-'}</td>
           <td>
             <button class="btn btn-sm btn-secondary btn-editar" data-id="${u.id}">Editar</button>
-            ${u.situacao !== 'bloqueado' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Bloquear</button>` : ''}
+            ${u.situacao === 'pendente' ? `<button class="btn btn-sm btn-success btn-autorizar" data-id="${u.id}">Autorizar</button>` : ''}
+            ${u.situacao !== 'bloqueado' && u.situacao !== 'pendente' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Bloquear</button>` : ''}
+            ${u.situacao === 'pendente' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Recusar</button>` : ''}
             ${u.situacao === 'bloqueado' ? `<button class="btn btn-sm btn-success btn-desbloquear" data-id="${u.id}">Liberar</button>` : ''}
           </td>
         </tr>
@@ -188,6 +190,10 @@ async function carregarUsuarios(): Promise<void> {
 
     container.querySelectorAll('.btn-editar').forEach((btn) => {
       btn.addEventListener('click', () => openUsuarioModal(Number((btn as HTMLElement).dataset.id)));
+    });
+
+    container.querySelectorAll('.btn-autorizar').forEach((btn) => {
+      btn.addEventListener('click', () => alterarSituacao(Number((btn as HTMLElement).dataset.id), 'ativo'));
     });
 
     container.querySelectorAll('.btn-bloquear').forEach((btn) => {
@@ -215,7 +221,9 @@ async function carregarUsuarios(): Promise<void> {
           <td>${u.perfilNome || '-'}</td>
           <td>
             <button class="btn btn-sm btn-secondary btn-editar" data-id="${u.id}">Editar</button>
-            ${u.situacao !== 'bloqueado' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Bloquear</button>` : ''}
+            ${u.situacao === 'pendente' ? `<button class="btn btn-sm btn-success btn-autorizar" data-id="${u.id}">Autorizar</button>` : ''}
+            ${u.situacao !== 'bloqueado' && u.situacao !== 'pendente' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Bloquear</button>` : ''}
+            ${u.situacao === 'pendente' ? `<button class="btn btn-sm btn-danger btn-bloquear" data-id="${u.id}">Recusar</button>` : ''}
             ${u.situacao === 'bloqueado' ? `<button class="btn btn-sm btn-success btn-desbloquear" data-id="${u.id}">Liberar</button>` : ''}
           </td>
         </tr>
@@ -242,6 +250,10 @@ async function carregarUsuarios(): Promise<void> {
       btn.addEventListener('click', () => openUsuarioModal(Number((btn as HTMLElement).dataset.id)));
     });
 
+    container.querySelectorAll('.btn-autorizar').forEach((btn) => {
+      btn.addEventListener('click', () => alterarSituacaoDemo(Number((btn as HTMLElement).dataset.id), 'ativo'));
+    });
+
     container.querySelectorAll('.btn-bloquear').forEach((btn) => {
       btn.addEventListener('click', () => alterarSituacaoDemo(Number((btn as HTMLElement).dataset.id), 'bloqueado'));
     });
@@ -263,7 +275,7 @@ async function alterarSituacao(id: number, situacao: string): Promise<void> {
 }
 
 async function alterarSituacaoDemo(id: number, situacao: string): Promise<void> {
-  const users = getDemoUsers();
+  const users = getDemoUsersRaw();
   const idx = users.findIndex((u) => u.id === id);
   if (idx === -1) return;
   users[idx].situacao = situacao as Usuario['situacao'];
@@ -305,6 +317,7 @@ function openUsuarioModal(id?: number): void {
         <div class="form-group">
           <label for="situacao">Situação</label>
           <select id="situacao" name="situacao" required>
+            <option value="pendente">Pendente</option>
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
             <option value="bloqueado">Bloqueado</option>
@@ -357,6 +370,8 @@ function getSituacaoClass(situacao: string): string {
   switch (situacao) {
     case 'ativo':
       return 'success';
+    case 'pendente':
+      return 'warning';
     case 'inativo':
       return 'warning';
     case 'bloqueado':

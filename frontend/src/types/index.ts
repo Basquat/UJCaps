@@ -4,7 +4,7 @@ export interface Usuario {
   email: string;
   perfilId: number;
   perfilNome?: string;
-  situacao: 'ativo' | 'inativo' | 'bloqueado';
+  situacao: 'pendente' | 'ativo' | 'inativo' | 'bloqueado';
   createdAt?: string;
 }
 

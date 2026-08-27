@@ -70,7 +70,7 @@ export function renderLogin(): void {
           </select>
         </div>
         <div id="cadastro-error" class="alert alert-error" style="display: none;"></div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Cadastrar e Entrar</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Cadastrar</button>
       </form>
       
       <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--gray-500);">
@@ -104,6 +104,7 @@ export function renderLogin(): void {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const errorDiv = document.getElementById('login-error')!;
+    errorDiv.className = 'alert alert-error';
     errorDiv.style.display = 'none';
 
     const email = (loginForm.elements.namedItem('email') as HTMLInputElement).value.trim();
@@ -126,8 +127,16 @@ export function renderLogin(): void {
       }
       showDashboard(response.usuario);
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      errorDiv.textContent = error.response?.data?.message || 'Credenciais inválidas. Tente novamente.';
+      const axiosError = err as { isAxiosError?: boolean; response?: { data?: { message?: string } } };
+      const plainError = err as { message?: string };
+      if (axiosError.response?.data?.message) {
+        errorDiv.textContent = axiosError.response.data.message;
+      } else if (!axiosError.isAxiosError && plainError.message) {
+        // Erro lançado por auth.login (ex.: cadastro pendente ou bloqueado)
+        errorDiv.textContent = plainError.message;
+      } else {
+        errorDiv.textContent = 'Credenciais inválidas. Tente novamente.';
+      }
       errorDiv.style.display = 'block';
     }
   });
@@ -149,8 +158,14 @@ export function renderLogin(): void {
     }
 
     try {
-      const usuario = await auth.cadastrarDemo({ nome, email, senha, perfilNome: perfil });
-      showDashboard(usuario);
+      await auth.cadastrarDemo({ nome, email, senha, perfilNome: perfil });
+      cadastroForm.reset();
+      errorDiv.style.display = 'none';
+      setActiveTab('login');
+      const loginErrorDiv = document.getElementById('login-error')!;
+      loginErrorDiv.className = 'alert alert-success';
+      loginErrorDiv.textContent = 'Cadastro realizado com sucesso! Aguarde a autorização do administrador para poder entrar.';
+      loginErrorDiv.style.display = 'block';
     } catch (err: unknown) {
       const error = err as { message?: string };
       errorDiv.textContent = error.message || 'Erro ao cadastrar.';

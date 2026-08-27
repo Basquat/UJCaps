@@ -1,5 +1,5 @@
 import { authService } from './api';
-import type { LoginRequest, LoginResponse, Usuario } from '@/types';
+import type { LoginRequest, LoginResponse, Usuario, ClientePaciente } from '@/types';
 
 const STORAGE_KEYS = {
   TOKEN: 'token',
@@ -18,12 +18,18 @@ function hashSenha(senha: string): string {
   return String(Math.abs(hash));
 }
 
-function getDemoUsers(): Array<{ id: number; nome: string; email: string; senha: string; perfilNome: string; situacao: Usuario['situacao'] }> {
+export type DemoUser = { id: number; nome: string; email: string; senha: string; perfilNome: string; situacao: Usuario['situacao'] };
+
+export function perfilIdFromNome(perfilNome: string): number {
+  return perfilNome.toLowerCase() === 'administrador' ? 1 : 2;
+}
+
+export function getDemoUsers(): DemoUser[] {
   const raw = localStorage.getItem(STORAGE_KEYS.DEMO_USERS);
   return raw ? JSON.parse(raw) : [];
 }
 
-function saveDemoUsers(users: Array<{ id: number; nome: string; email: string; senha: string; perfilNome: string; situacao: Usuario['situacao'] }>): void {
+export function saveDemoUsers(users: DemoUser[]): void {
   localStorage.setItem(STORAGE_KEYS.DEMO_USERS, JSON.stringify(users));
 }
 
@@ -77,8 +83,21 @@ export const auth = {
       const response = await authService.login(credentials);
       return response;
     }
+
+    // Verificação de autorização: mesmo com credenciais válidas, o acesso só é
+    // concedido se o cadastro estiver autorizado (situacao === 'ativo').
+    // Esta checagem é o ponto central de autenticação usado por toda a aplicação
+    // (Login.ts sempre passa por auth.login), portanto não pode ser contornada
+    // alterando apenas o front-end.
+    if (user.situacao === 'pendente') {
+      throw new Error('Seu cadastro ainda não foi autorizado pelo administrador.');
+    }
+    if (user.situacao === 'bloqueado' || user.situacao === 'inativo') {
+      throw new Error('Seu acesso está bloqueado. Entre em contato com o administrador.');
+    }
+
     const token = btoa(`${user.id}:${Date.now()}`);
-    const usuario: Usuario = { id: user.id, nome: user.nome, email: user.email, perfilNome: user.perfilNome, situacao: user.situacao };
+    const usuario: Usuario = { id: user.id, nome: user.nome, email: user.email, perfilId: perfilIdFromNome(user.perfilNome), perfilNome: user.perfilNome, situacao: user.situacao };
     localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
     return { token, usuario };
@@ -90,21 +109,23 @@ export const auth = {
     if (users.some((u) => u.email === dados.email)) {
       throw new Error('E-mail já cadastrado.');
     }
-    const newUser = {
+    // Todo novo cadastro entra como "pendente", independente do perfil escolhido.
+    // Isso impede que um usuário obtenha acesso (inclusive como Administrador)
+    // apenas por possuir e-mail e senha válidos: é sempre necessária a
+    // autorização do Administrador Mestre antes do primeiro login.
+    const newUser: DemoUser = {
       id: users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1,
       nome: dados.nome,
       email: dados.email,
       senha: hashSenha(dados.senha),
       perfilNome: dados.perfilNome,
-      situacao: 'ativo' as Usuario['situacao'],
+      situacao: 'pendente',
     };
     users.push(newUser);
     saveDemoUsers(users);
 
-    const usuario: Usuario = { id: newUser.id, nome: newUser.nome, email: newUser.email, perfilNome: newUser.perfilNome, situacao: newUser.situacao };
-    const token = btoa(`${newUser.id}:${Date.now()}`);
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
+    // Nenhuma sessão é criada aqui: cadastro não concede login automático.
+    const usuario: Usuario = { id: newUser.id, nome: newUser.nome, email: newUser.email, perfilId: perfilIdFromNome(newUser.perfilNome), perfilNome: newUser.perfilNome, situacao: newUser.situacao };
     return usuario;
   },
 
