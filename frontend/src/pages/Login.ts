@@ -1,5 +1,5 @@
 import { auth, ensureDemoData } from '@/services/auth';
-import type { Usuario } from '@/types';
+import type { Sessao } from '@/types';
 
 export function renderLogin(): void {
   ensureDemoData();
@@ -16,22 +16,17 @@ export function renderLogin(): void {
 
       <form id="login-form">
         <div class="form-group">
-          <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" required placeholder="seu@email.com" autocomplete="email" />
+          <label for="identificador">CPF ou e-mail (administrador)</label>
+          <input type="text" id="identificador" name="identificador" required placeholder="000.000.000-00" autocomplete="username" />
         </div>
-        
+
         <div class="form-group">
           <label for="senha">Senha</label>
           <input type="password" id="senha" name="senha" required placeholder="********" autocomplete="current-password" />
         </div>
 
-        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
-          <input type="checkbox" id="modo-demo" />
-          <label for="modo-demo" style="margin: 0; cursor: pointer;">Usar modo demonstração (sem back-end)</label>
-        </div>
-        
         <div id="login-error" class="alert alert-error" style="display: none;"></div>
-        
+
         <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
       </form>
 
@@ -41,8 +36,12 @@ export function renderLogin(): void {
           <input type="text" id="cad-nome" name="nome" required />
         </div>
         <div class="form-group">
-          <label for="cad-email">E-mail</label>
-          <input type="email" id="cad-email" name="email" required />
+          <label for="cad-cpf">CPF</label>
+          <input type="text" id="cad-cpf" name="cpf" required maxlength="14" placeholder="000.000.000-00" />
+        </div>
+        <div class="form-group">
+          <label for="cad-cep">CEP</label>
+          <input type="text" id="cad-cep" name="cep" required maxlength="9" placeholder="00000-000" />
         </div>
         <div class="form-group">
           <label for="cad-senha">Senha</label>
@@ -51,16 +50,16 @@ export function renderLogin(): void {
         <div class="form-group">
           <label for="cad-perfil">Perfil</label>
           <select id="cad-perfil" name="perfil" required>
-            <option value="Psicólogo">Psicólogo</option>
-            <option value="Administrador">Administrador</option>
+            <option value="usuario">Paciente</option>
+            <option value="psicologo">Psicólogo</option>
           </select>
         </div>
         <div id="cadastro-error" class="alert alert-error" style="display: none;"></div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Cadastrar</button>
       </form>
-      
+
       <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--text-dim);">
-        Acesso restrito a profissionais cadastrados
+        Acesso restrito a profissionais e pacientes cadastrados
       </p>
     </div>
   `;
@@ -93,32 +92,25 @@ export function renderLogin(): void {
     errorDiv.className = 'alert alert-error';
     errorDiv.style.display = 'none';
 
-    const email = (loginForm.elements.namedItem('email') as HTMLInputElement).value.trim();
+    const identificador = (loginForm.elements.namedItem('identificador') as HTMLInputElement).value.trim();
     const senha = (loginForm.elements.namedItem('senha') as HTMLInputElement).value;
-    const modoDemo = (document.getElementById('modo-demo') as HTMLInputElement).checked;
 
-    if (!email || !senha) {
+    if (!identificador || !senha) {
       errorDiv.textContent = 'Preencha todos os campos.';
       errorDiv.style.display = 'block';
       return;
     }
 
     try {
-      let response;
-      if (modoDemo) {
-        const fakeResponse = await auth.login({ email, senha });
-        response = fakeResponse;
-      } else {
-        response = await auth.login({ email, senha });
-      }
-      showDashboard(response.usuario);
+      const response = await auth.login({ identificador, senha });
+      showDashboard(response.sessao);
     } catch (err: unknown) {
       const axiosError = err as { isAxiosError?: boolean; response?: { data?: { message?: string } } };
       const plainError = err as { message?: string };
       if (axiosError.response?.data?.message) {
         errorDiv.textContent = axiosError.response.data.message;
       } else if (!axiosError.isAxiosError && plainError.message) {
-        // Erro lançado por auth.login (ex.: cadastro pendente ou bloqueado)
+        // Erro lançado por auth.login (ex.: cadastro pendente de autorização)
         errorDiv.textContent = plainError.message;
       } else {
         errorDiv.textContent = 'Credenciais inválidas. Tente novamente.';
@@ -133,24 +125,28 @@ export function renderLogin(): void {
     errorDiv.style.display = 'none';
 
     const nome = (cadastroForm.elements.namedItem('nome') as HTMLInputElement).value.trim();
-    const email = (cadastroForm.elements.namedItem('email') as HTMLInputElement).value.trim();
+    const cpf = (cadastroForm.elements.namedItem('cpf') as HTMLInputElement).value.trim();
+    const cep = (cadastroForm.elements.namedItem('cep') as HTMLInputElement).value.trim();
     const senha = (cadastroForm.elements.namedItem('senha') as HTMLInputElement).value;
-    const perfil = (cadastroForm.elements.namedItem('perfil') as HTMLSelectElement).value;
+    const perfil = (cadastroForm.elements.namedItem('perfil') as HTMLSelectElement).value as 'psicologo' | 'usuario';
 
-    if (!nome || !email || !senha) {
+    if (!nome || !cpf || !cep || !senha) {
       errorDiv.textContent = 'Preencha todos os campos.';
       errorDiv.style.display = 'block';
       return;
     }
 
     try {
-      await auth.cadastrarDemo({ nome, email, senha, perfilNome: perfil });
+      await auth.cadastrarDemo({ nome, cpf, cep, senha, perfil });
       cadastroForm.reset();
       errorDiv.style.display = 'none';
       setActiveTab('login');
       const loginErrorDiv = document.getElementById('login-error')!;
       loginErrorDiv.className = 'alert alert-success';
-      loginErrorDiv.textContent = 'Cadastro realizado com sucesso! Aguarde a autorização do administrador para poder entrar.';
+      loginErrorDiv.textContent =
+        perfil === 'psicologo'
+          ? 'Cadastro realizado com sucesso! Aguarde a autorização do administrador para poder entrar.'
+          : 'Cadastro realizado com sucesso! Você já pode entrar com seu CPF e senha.';
       loginErrorDiv.style.display = 'block';
     } catch (err: unknown) {
       const error = err as { message?: string };
@@ -160,14 +156,12 @@ export function renderLogin(): void {
   });
 }
 
-function showDashboard(usuario: { nome: string; perfilNome?: string }): void {
-  const perfil = usuario.perfilNome?.toLowerCase() || '';
-
-  if (perfil === 'administrador') {
-    import('./AdminDashboard').then((m) => m.renderAdminDashboard(usuario as Usuario));
-  } else if (perfil === 'psicólogo' || perfil === 'psicologo') {
-    import('./PsychologistDashboard').then((m) => m.renderPsychologistDashboard(usuario as Usuario));
+function showDashboard(sessao: Sessao): void {
+  if (sessao.tipo === 'administrador') {
+    import('./AdminDashboard').then((m) => m.renderAdminDashboard(sessao));
+  } else if (sessao.tipo === 'psicologo') {
+    import('./PsychologistDashboard').then((m) => m.renderPsychologistDashboard(sessao));
   } else {
-    alert('Perfil de acesso não reconhecido. Contate o administrador.');
+    alert('Acesso de paciente ainda não possui painel próprio nesta versão.');
   }
 }

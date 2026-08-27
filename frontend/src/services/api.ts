@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LoginRequest, LoginResponse, Usuario, Psicologo, ClientePaciente, LogAcao } from '@/types';
+import type { LoginRequest, LoginResponse, Usuario, Psicologo, Administrador, Consulta } from '@/types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -23,7 +23,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      localStorage.removeItem('usuario');
+      localStorage.removeItem('sessao');
       window.location.href = '/';
     }
     return Promise.reject(error);
@@ -38,65 +38,63 @@ export const authService = {
 
   async logout(): Promise<void> {
     await api.post('/api/auth/logout');
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
   },
 };
 
-export const userService = {
+export const usuarioService = {
   async listarUsuarios(): Promise<Usuario[]> {
-    const { data } = await api.get<Usuario[]>('/api/users');
+    const { data } = await api.get<Usuario[]>('/api/usuarios');
     return data;
   },
 
-  async cadastrarUsuario(usuario: Partial<Usuario> & { senha: string }): Promise<Usuario> {
-    const { data } = await api.post<Usuario>('/api/users', usuario);
+  async cadastrarUsuario(usuario: Partial<Usuario> & { usuarioSenha: string }): Promise<Usuario> {
+    const { data } = await api.post<Usuario>('/api/usuarios', usuario);
     return data;
   },
 
-  async atualizarUsuario(id: number, usuario: Partial<Usuario>): Promise<Usuario> {
-    const { data } = await api.patch<Usuario>(`/api/users/${id}`, usuario);
+  async atualizarUsuario(usuarioID: string, usuario: Partial<Usuario>): Promise<Usuario> {
+    const { data } = await api.patch<Usuario>(`/api/usuarios/${usuarioID}`, usuario);
     return data;
   },
 };
 
-export const psychologistService = {
+export const psicologoService = {
   async listarPsicologos(): Promise<Psicologo[]> {
-    const { data } = await api.get<Psicologo[]>('/api/psychologists');
+    const { data } = await api.get<Psicologo[]>('/api/psicologos');
     return data;
   },
 
-  async cadastrarPsicologo(psicologo: Partial<Psicologo>): Promise<Psicologo> {
-    const { data } = await api.post<Psicologo>('/api/psychologists', psicologo);
-    return data;
-  },
-};
-
-export const patientService = {
-  async listarPacientes(): Promise<ClientePaciente[]> {
-    const { data } = await api.get<ClientePaciente[]>('/api/patients');
+  async cadastrarPsicologo(psicologo: Partial<Psicologo> & { psicologoSenha: string }): Promise<Psicologo> {
+    const { data } = await api.post<Psicologo>('/api/psicologos', psicologo);
     return data;
   },
 
-  async buscarPaciente(id: number): Promise<ClientePaciente> {
-    const { data } = await api.get<ClientePaciente>(`/api/patients/${id}`);
-    return data;
-  },
-
-  async cadastrarPaciente(paciente: Partial<ClientePaciente>): Promise<ClientePaciente> {
-    const { data } = await api.post<ClientePaciente>('/api/patients', paciente);
-    return data;
-  },
-
-  async atualizarPaciente(id: number, paciente: Partial<ClientePaciente>): Promise<ClientePaciente> {
-    const { data } = await api.patch<ClientePaciente>(`/api/patients/${id}`, paciente);
+  async atualizarPsicologo(psicologoID: string, psicologo: Partial<Psicologo>): Promise<Psicologo> {
+    const { data } = await api.patch<Psicologo>(`/api/psicologos/${psicologoID}`, psicologo);
     return data;
   },
 };
 
-export const auditService = {
-  async listarLogs(): Promise<LogAcao[]> {
-    const { data } = await api.get<LogAcao[]>('/api/audit-logs');
+export const administradorService = {
+  async listarAdministradores(): Promise<Administrador[]> {
+    const { data } = await api.get<Administrador[]>('/api/administradores');
+    return data;
+  },
+};
+
+export const consultaService = {
+  async listarConsultas(): Promise<Consulta[]> {
+    const { data } = await api.get<Consulta[]>('/api/consultas');
+    return data;
+  },
+
+  async cadastrarConsulta(consulta: Pick<Consulta, 'usuarioID' | 'psicologoID' | 'dataConsulta'>): Promise<Consulta> {
+    const { data } = await api.post<Consulta>('/api/consultas', consulta);
+    return data;
+  },
+
+  async atualizarConsulta(consultaID: number, consulta: Partial<Consulta>): Promise<Consulta> {
+    const { data } = await api.patch<Consulta>(`/api/consultas/${consultaID}`, consulta);
     return data;
   },
 };

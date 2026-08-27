@@ -1,13 +1,13 @@
 import { authService } from './api';
-import type { LoginRequest, LoginResponse, Usuario, ClientePaciente, Psicologo, LogAcao } from '@/types';
+import type { LoginRequest, LoginResponse, Sessao, Usuario, Psicologo, Administrador, Consulta } from '@/types';
 
 const STORAGE_KEYS = {
   TOKEN: 'token',
-  USUARIO: 'usuario',
-  DEMO_USERS: 'psico_demo_users',
-  DEMO_PATIENTS: 'psico_demo_patients',
-  DEMO_PSYCHOLOGISTS: 'psico_demo_psychologists',
-  DEMO_LOGS: 'psico_demo_logs',
+  SESSAO: 'sessao',
+  DEMO_ADMINS: 'ujcaps_demo_admins',
+  DEMO_PSICOLOGOS: 'ujcaps_demo_psicologos',
+  DEMO_USUARIOS: 'ujcaps_demo_usuarios',
+  DEMO_CONSULTAS: 'ujcaps_demo_consultas',
 };
 
 function hashSenha(senha: string): string {
@@ -20,91 +20,112 @@ function hashSenha(senha: string): string {
   return String(Math.abs(hash));
 }
 
-export type DemoUser = { id: number; nome: string; email: string; senha: string; perfilNome: string; situacao: Usuario['situacao'] };
-
-export function perfilIdFromNome(perfilNome: string): number {
-  return perfilNome.toLowerCase() === 'administrador' ? 1 : 2;
+function novoId(prefixo: string): string {
+  return `${prefixo}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function getDemoUsers(): DemoUser[] {
-  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_USERS);
+function somenteDigitos(valor: string): string {
+  return valor.replace(/\D/g, '');
+}
+
+type DemoAdmin = Administrador & { adminSenha: string };
+type DemoPsicologo = Psicologo & { psicologoSenha: string };
+type DemoUsuario = Usuario & { usuarioSenha: string };
+
+export function getDemoAdmins(): DemoAdmin[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_ADMINS);
   return raw ? JSON.parse(raw) : [];
 }
 
-export function saveDemoUsers(users: DemoUser[]): void {
-  localStorage.setItem(STORAGE_KEYS.DEMO_USERS, JSON.stringify(users));
+export function saveDemoAdmins(admins: DemoAdmin[]): void {
+  localStorage.setItem(STORAGE_KEYS.DEMO_ADMINS, JSON.stringify(admins));
 }
 
-export function getDemoPatients(): ClientePaciente[] {
-  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS);
+export function getDemoPsicologos(): DemoPsicologo[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_PSICOLOGOS);
   return raw ? JSON.parse(raw) : [];
 }
 
-export function saveDemoPatients(patients: ClientePaciente[]): void {
-  localStorage.setItem(STORAGE_KEYS.DEMO_PATIENTS, JSON.stringify(patients));
+export function saveDemoPsicologos(psicologos: DemoPsicologo[]): void {
+  localStorage.setItem(STORAGE_KEYS.DEMO_PSICOLOGOS, JSON.stringify(psicologos));
 }
 
-export function getDemoPsychologists(): Psicologo[] {
-  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS);
+export function getDemoUsuarios(): DemoUsuario[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_USUARIOS);
   return raw ? JSON.parse(raw) : [];
 }
 
-export function saveDemoPsychologists(psicologos: Psicologo[]): void {
-  localStorage.setItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS, JSON.stringify(psicologos));
+export function saveDemoUsuarios(usuarios: DemoUsuario[]): void {
+  localStorage.setItem(STORAGE_KEYS.DEMO_USUARIOS, JSON.stringify(usuarios));
 }
 
-export function getDemoLogs(): LogAcao[] {
-  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_LOGS);
+export function getDemoConsultas(): Consulta[] {
+  const raw = localStorage.getItem(STORAGE_KEYS.DEMO_CONSULTAS);
   return raw ? JSON.parse(raw) : [];
 }
 
-export function registrarLogDemo(usuarioId: number, usuarioNome: string, acao: string, entidade: string, entidadeId?: number): void {
-  const logs = getDemoLogs();
-  logs.unshift({
-    id: logs.length ? Math.max(...logs.map((l) => l.id)) + 1 : 1,
-    usuarioId,
-    usuarioNome,
-    acao,
-    entidade,
-    entidadeId,
-    dataHora: new Date().toISOString(),
-  });
-  localStorage.setItem(STORAGE_KEYS.DEMO_LOGS, JSON.stringify(logs));
+export function saveDemoConsultas(consultas: Consulta[]): void {
+  localStorage.setItem(STORAGE_KEYS.DEMO_CONSULTAS, JSON.stringify(consultas));
 }
 
-function ensureDemoData(): void {
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_USERS)) {
-    saveDemoUsers([
-      { id: 1, nome: 'Admin Mestre', email: 'joaodan.lisboa@gmail.com', senha: hashSenha('2905@'), perfilNome: 'Administrador', situacao: 'ativo' },
-      { id: 2, nome: 'Psicólogo Demo', email: 'psicologo@demo.com', senha: hashSenha('psicologo123'), perfilNome: 'Psicólogo', situacao: 'ativo' },
+export function ensureDemoData(): void {
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_ADMINS)) {
+    saveDemoAdmins([
+      {
+        adminID: 'admin-mestre',
+        adminNome: 'Admin Mestre',
+        adminEmail: 'joaodan.lisboa@gmail.com',
+        adminSenha: hashSenha('2905@'),
+        dataCriacao: new Date().toISOString(),
+      },
     ]);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PSYCHOLOGISTS)) {
-    saveDemoPsychologists([
-      { id: 1, usuarioId: 2, nome: 'Psicólogo Demo', crm: 'CRP 06/123456', areaAtuacao: 'Terapia Cognitivo-Comportamental', telefone: '(11) 98888-7777', email: 'psicologo@demo.com', situacao: 'ativo' },
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PSICOLOGOS)) {
+    saveDemoPsicologos([
+      {
+        psicologoID: 'psi-demo',
+        psicologoCPF: '11122233344',
+        psicologoNome: 'Psicólogo Demo',
+        psicologoCEP: '01310100',
+        psicologoSenha: hashSenha('psico123'),
+        contaLiberada: true,
+        dataAprovacao: new Date(Date.now() - 86400000).toISOString(),
+        aprovadoADM: 'admin-mestre',
+      },
     ]);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_PATIENTS)) {
-    saveDemoPatients([
-      { id: 1, nome: 'Paciente Demo', telefone: '(11) 99999-9999', dataNascimento: '1990-01-01', email: 'paciente@demo.com', situacao: 'ativo', psicologoId: 1 },
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_USUARIOS)) {
+    saveDemoUsuarios([
+      {
+        usuarioID: 'usr-demo',
+        usuarioCPF: '55566677788',
+        usuarioNome: 'Paciente Demo',
+        usuarioCEP: '01310100',
+        usuarioSenha: hashSenha('pac123'),
+        usuarioPago: true,
+      },
     ]);
   }
-  if (!localStorage.getItem(STORAGE_KEYS.DEMO_LOGS)) {
-    localStorage.setItem(STORAGE_KEYS.DEMO_LOGS, JSON.stringify([
-      { id: 1, usuarioId: 2, usuarioNome: 'Psicólogo Demo', acao: 'Paciente cadastrado', entidade: 'ClientePaciente', entidadeId: 1, dataHora: new Date(Date.now() - 86400000).toISOString() },
-    ]));
+  if (!localStorage.getItem(STORAGE_KEYS.DEMO_CONSULTAS)) {
+    saveDemoConsultas([
+      {
+        consultaID: 1,
+        usuarioID: 'usr-demo',
+        psicologoID: 'psi-demo',
+        dataConsulta: new Date(Date.now() + 3 * 86400000).toISOString(),
+        statusConsulta: 'AGENDADA',
+      },
+    ]);
   }
 }
-
-export { ensureDemoData };
 
 export const auth = {
   getToken(): string | null {
     return localStorage.getItem(STORAGE_KEYS.TOKEN);
   },
 
-  getUsuario(): Usuario | null {
-    const data = localStorage.getItem(STORAGE_KEYS.USUARIO);
+  getSessao(): Sessao | null {
+    const data = localStorage.getItem(STORAGE_KEYS.SESSAO);
     return data ? JSON.parse(data) : null;
   },
 
@@ -113,63 +134,89 @@ export const auth = {
   },
 
   isAdmin(): boolean {
-    const usuario = this.getUsuario();
-    return usuario?.perfilNome?.toLowerCase() === 'administrador';
+    return this.getSessao()?.tipo === 'administrador';
   },
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     ensureDemoData();
-    const users = getDemoUsers();
-    const user = users.find((u) => u.email === credentials.email && u.senha === hashSenha(credentials.senha));
-    if (!user) {
-      const response = await authService.login(credentials);
-      return response;
+    const identificador = credentials.identificador.trim();
+    const senhaHash = hashSenha(credentials.senha);
+    const ehEmail = identificador.includes('@');
+
+    if (ehEmail) {
+      const admins = getDemoAdmins();
+      const admin = admins.find((a) => a.adminEmail.toLowerCase() === identificador.toLowerCase() && a.adminSenha === senhaHash);
+      if (admin) {
+        return this.abrirSessao({ tipo: 'administrador', id: admin.adminID, nome: admin.adminNome });
+      }
+    } else {
+      const cpf = somenteDigitos(identificador);
+
+      const psicologos = getDemoPsicologos();
+      const psicologo = psicologos.find((p) => p.psicologoCPF === cpf && p.psicologoSenha === senhaHash);
+      if (psicologo) {
+        if (!psicologo.contaLiberada) {
+          throw new Error('Seu cadastro ainda não foi autorizado pelo administrador.');
+        }
+        return this.abrirSessao({ tipo: 'psicologo', id: psicologo.psicologoID, nome: psicologo.psicologoNome });
+      }
+
+      const usuarios = getDemoUsuarios();
+      const usuario = usuarios.find((u) => u.usuarioCPF === cpf && u.usuarioSenha === senhaHash);
+      if (usuario) {
+        return this.abrirSessao({ tipo: 'usuario', id: usuario.usuarioID, nome: usuario.usuarioNome });
+      }
     }
 
-    // Verificação de autorização: mesmo com credenciais válidas, o acesso só é
-    // concedido se o cadastro estiver autorizado (situacao === 'ativo').
-    // Esta checagem é o ponto central de autenticação usado por toda a aplicação
-    // (Login.ts sempre passa por auth.login), portanto não pode ser contornada
-    // alterando apenas o front-end.
-    if (user.situacao === 'pendente') {
-      throw new Error('Seu cadastro ainda não foi autorizado pelo administrador.');
-    }
-    if (user.situacao === 'bloqueado' || user.situacao === 'inativo') {
-      throw new Error('Seu acesso está bloqueado. Entre em contato com o administrador.');
-    }
-
-    const token = btoa(`${user.id}:${Date.now()}`);
-    const usuario: Usuario = { id: user.id, nome: user.nome, email: user.email, perfilId: perfilIdFromNome(user.perfilNome), perfilNome: user.perfilNome, situacao: user.situacao };
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(usuario));
-    registrarLogDemo(usuario.id, usuario.nome, 'Login realizado', 'Usuario', usuario.id);
-    return { token, usuario };
+    return authService.login(credentials);
   },
 
-  async cadastrarDemo(dados: { nome: string; email: string; senha: string; perfilNome: string }): Promise<Usuario> {
-    ensureDemoData();
-    const users = getDemoUsers();
-    if (users.some((u) => u.email === dados.email)) {
-      throw new Error('E-mail já cadastrado.');
-    }
-    // Todo novo cadastro entra como "pendente", independente do perfil escolhido.
-    // Isso impede que um usuário obtenha acesso (inclusive como Administrador)
-    // apenas por possuir e-mail e senha válidos: é sempre necessária a
-    // autorização do Administrador Mestre antes do primeiro login.
-    const newUser: DemoUser = {
-      id: users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1,
-      nome: dados.nome,
-      email: dados.email,
-      senha: hashSenha(dados.senha),
-      perfilNome: dados.perfilNome,
-      situacao: 'pendente',
-    };
-    users.push(newUser);
-    saveDemoUsers(users);
+  abrirSessao(sessao: Sessao): LoginResponse {
+    const token = btoa(`${sessao.tipo}:${sessao.id}:${Date.now()}`);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+    localStorage.setItem(STORAGE_KEYS.SESSAO, JSON.stringify(sessao));
+    return { token, sessao };
+  },
 
-    // Nenhuma sessão é criada aqui: cadastro não concede login automático.
-    const usuario: Usuario = { id: newUser.id, nome: newUser.nome, email: newUser.email, perfilId: perfilIdFromNome(newUser.perfilNome), perfilNome: newUser.perfilNome, situacao: newUser.situacao };
-    return usuario;
+  async cadastrarDemo(dados: { nome: string; cpf: string; cep: string; senha: string; perfil: 'psicologo' | 'usuario' }): Promise<void> {
+    ensureDemoData();
+    const cpf = somenteDigitos(dados.cpf);
+
+    if (dados.perfil === 'psicologo') {
+      const psicologos = getDemoPsicologos();
+      if (psicologos.some((p) => p.psicologoCPF === cpf)) {
+        throw new Error('CPF já cadastrado.');
+      }
+      // Todo psicólogo entra com contaLiberada = false: precisa da aprovação
+      // do administrador mestre antes do primeiro login (aprovadoADM/dataAprovacao
+      // só são preenchidos nesse momento).
+      psicologos.push({
+        psicologoID: novoId('psi'),
+        psicologoCPF: cpf,
+        psicologoNome: dados.nome,
+        psicologoCEP: somenteDigitos(dados.cep),
+        psicologoSenha: hashSenha(dados.senha),
+        contaLiberada: false,
+        dataAprovacao: null,
+        aprovadoADM: null,
+      });
+      saveDemoPsicologos(psicologos);
+      return;
+    }
+
+    const usuarios = getDemoUsuarios();
+    if (usuarios.some((u) => u.usuarioCPF === cpf)) {
+      throw new Error('CPF já cadastrado.');
+    }
+    usuarios.push({
+      usuarioID: novoId('usr'),
+      usuarioCPF: cpf,
+      usuarioNome: dados.nome,
+      usuarioCEP: somenteDigitos(dados.cep),
+      usuarioSenha: hashSenha(dados.senha),
+      usuarioPago: true,
+    });
+    saveDemoUsuarios(usuarios);
   },
 
   async logout(): Promise<void> {
@@ -179,6 +226,6 @@ export const auth = {
       // Sem back-end disponível (modo demo): a sessão local ainda deve ser encerrada.
     }
     localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USUARIO);
+    localStorage.removeItem(STORAGE_KEYS.SESSAO);
   },
 };

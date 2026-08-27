@@ -1,68 +1,52 @@
-export interface Usuario {
-  id: number;
-  nome: string;
-  email: string;
-  perfilId: number;
-  perfilNome?: string;
-  situacao: 'pendente' | 'ativo' | 'inativo' | 'bloqueado';
-  createdAt?: string;
-}
-
-export interface Perfil {
-  id: number;
-  nome: string;
-  descricao?: string;
+export interface Administrador {
+  adminID: string;
+  adminNome: string;
+  adminEmail: string;
+  dataCriacao?: string;
 }
 
 export interface Psicologo {
-  id: number;
-  usuarioId: number;
+  psicologoID: string;
+  psicologoCPF: string;
+  psicologoNome: string;
+  psicologoCEP: string;
+  contaLiberada: boolean;
+  dataAprovacao?: string | null;
+  aprovadoADM?: string | null;
+}
+
+export interface Usuario {
+  usuarioID: string;
+  usuarioCPF: string;
+  usuarioNome: string;
+  usuarioCEP: string;
+  usuarioPago: boolean;
+}
+
+export interface Consulta {
+  consultaID: number;
+  usuarioID: string;
+  psicologoID: string;
+  dataConsulta: string;
+  statusConsulta: string;
+}
+
+export type TipoConta = 'administrador' | 'psicologo' | 'usuario';
+
+export interface Sessao {
+  tipo: TipoConta;
+  id: string;
   nome: string;
-  crm?: string;
-  areaAtuacao?: string;
-  telefone?: string;
-  email?: string;
-  situacao: 'ativo' | 'inativo';
-}
-
-export interface ClientePaciente {
-  id: number;
-  nome: string;
-  dataNascimento?: string;
-  telefone?: string;
-  email?: string;
-  endereco?: string;
-  psicologoId?: number;
-  psicologoNome?: string;
-  situacao: 'ativo' | 'inativo';
-  createdAt?: string;
-}
-
-export interface Vinculo {
-  id: number;
-  psicologoId: number;
-  clienteId: number;
-  dataVinculo: string;
-}
-
-export interface LogAcao {
-  id: number;
-  usuarioId: number;
-  usuarioNome?: string;
-  acao: string;
-  entidade: string;
-  entidadeId?: number;
-  dataHora: string;
 }
 
 export interface LoginRequest {
-  email: string;
+  identificador: string;
   senha: string;
 }
 
 export interface LoginResponse {
   token: string;
-  usuario: Usuario;
+  sessao: Sessao;
 }
 
 export interface ApiError {
