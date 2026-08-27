@@ -50,7 +50,7 @@ export async function renderPsychologistDashboard(usuario: Usuario): Promise<voi
       </div>
 
       <div id="pacientes-container" class="table-container">
-        <p style="padding: 1rem; color: var(--gray-500);">Carregando pacientes...</p>
+        <p style="padding: 1rem; color: var(--text-dim);">Carregando pacientes...</p>
       </div>
     </div>
   `;
@@ -78,7 +78,7 @@ async function carregarEstatisticas(usuario: Usuario): Promise<void> {
       container.innerHTML = `
         <div class="stat-card">
           <h3>Perfil Profissional</h3>
-          <p style="color: var(--gray-500); font-size: 0.875rem;">Complete seu cadastro profissional.</p>
+          <p style="color: var(--text-dim); font-size: 0.875rem;">Complete seu cadastro profissional.</p>
         </div>
       `;
       return;
@@ -92,7 +92,7 @@ async function carregarEstatisticas(usuario: Usuario): Promise<void> {
       <div class="stat-card">
         <h3>Meus Pacientes</h3>
         <div class="stat-value">${meusPacientes.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           ${ativos} ativos
         </p>
       </div>
@@ -108,7 +108,7 @@ async function carregarEstatisticas(usuario: Usuario): Promise<void> {
       container.innerHTML = `
         <div class="stat-card">
           <h3>Perfil Profissional</h3>
-          <p style="color: var(--gray-500); font-size: 0.875rem;">Complete seu cadastro profissional.</p>
+          <p style="color: var(--text-dim); font-size: 0.875rem;">Complete seu cadastro profissional.</p>
         </div>
       `;
       return;
@@ -122,7 +122,7 @@ async function carregarEstatisticas(usuario: Usuario): Promise<void> {
       <div class="stat-card">
         <h3>Meus Pacientes</h3>
         <div class="stat-value">${meusPacientes.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           ${ativos} ativos
         </p>
       </div>
@@ -151,7 +151,7 @@ async function carregarPacientes(filtro?: string): Promise<void> {
     }
 
     if (meusPacientes.length === 0) {
-      container.innerHTML = '<p style="padding: 1rem; color: var(--gray-500);">Nenhum paciente encontrado.</p>';
+      container.innerHTML = '<p style="padding: 1rem; color: var(--text-dim);">Nenhum paciente encontrado.</p>';
       return;
     }
 
@@ -201,7 +201,7 @@ async function carregarPacientes(filtro?: string): Promise<void> {
     }
 
     if (meusPacientes.length === 0) {
-      container.innerHTML = '<p style="padding: 1rem; color: var(--gray-500);">Nenhum paciente encontrado.</p>';
+      container.innerHTML = '<p style="padding: 1rem; color: var(--text-dim);">Nenhum paciente encontrado.</p>';
       return;
     }
 

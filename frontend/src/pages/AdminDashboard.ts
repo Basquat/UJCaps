@@ -57,7 +57,7 @@ export async function renderAdminDashboard(usuario: Usuario): Promise<void> {
       </div>
 
       <div id="usuarios-container" class="table-container">
-        <p style="padding: 1rem; color: var(--gray-500);">Carregando usuários...</p>
+        <p style="padding: 1rem; color: var(--text-dim);">Carregando usuários...</p>
       </div>
     </div>
   `;
@@ -88,21 +88,21 @@ async function carregarEstatisticas(): Promise<void> {
       <div class="stat-card">
         <h3>Total de Usuários</h3>
         <div class="stat-value">${usuarios.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           ${ativos} ativos, ${pendentes} pendentes, ${inativos} inativos, ${bloqueados} bloqueados
         </p>
       </div>
       <div class="stat-card">
         <h3>Psicólogos</h3>
         <div class="stat-value">${psicologos.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           Profissionais cadastrados
         </p>
       </div>
       <div class="stat-card">
         <h3>Clientes/Pacientes</h3>
         <div class="stat-value">${pacientes.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           Registros ativos
         </p>
       </div>
@@ -120,21 +120,21 @@ async function carregarEstatisticas(): Promise<void> {
       <div class="stat-card">
         <h3>Total de Usuários</h3>
         <div class="stat-value">${usuarios.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           ${ativos} ativos, ${pendentes} pendentes, ${inativos} inativos, ${bloqueados} bloqueados
         </p>
       </div>
       <div class="stat-card">
         <h3>Psicólogos</h3>
         <div class="stat-value">${psicologos.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           Profissionais cadastrados
         </p>
       </div>
       <div class="stat-card">
         <h3>Clientes/Pacientes</h3>
         <div class="stat-value">${pacientes.length}</div>
-        <p style="color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem;">
+        <p style="color: var(--text-dim); font-size: 0.8125rem; margin-top: 0.25rem;">
           Registros ativos
         </p>
       </div>
@@ -149,7 +149,7 @@ async function carregarUsuarios(): Promise<void> {
     const usuarios = await userService.listarUsuarios();
 
     if (usuarios.length === 0) {
-      container.innerHTML = '<p style="padding: 1rem; color: var(--gray-500);">Nenhum usuário cadastrado.</p>';
+      container.innerHTML = '<p style="padding: 1rem; color: var(--text-dim);">Nenhum usuário cadastrado.</p>';
       return;
     }
 
@@ -207,7 +207,7 @@ async function carregarUsuarios(): Promise<void> {
     const usuarios = getDemoUsers();
 
     if (usuarios.length === 0) {
-      container.innerHTML = '<p style="padding: 1rem; color: var(--gray-500);">Nenhum usuário cadastrado.</p>';
+      container.innerHTML = '<p style="padding: 1rem; color: var(--text-dim);">Nenhum usuário cadastrado.</p>';
       return;
     }
 

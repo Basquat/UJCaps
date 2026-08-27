@@ -20,12 +20,12 @@ export function renderLogin(): void {
   const container = document.getElementById('page-login')!;
   container.innerHTML = `
     <div class="card">
-      <h2 style="text-align: center; margin-bottom: 0.5rem; color: var(--gray-900);">PsicoGest</h2>
-      <p style="text-align: center; color: var(--gray-500); margin-bottom: 2rem; font-size: 0.875rem;">Gestão para Profissionais de Psicologia</p>
-      
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; background: var(--gray-100); padding: 0.25rem; border-radius: 0.375rem;">
-        <button id="tab-login" type="button" class="btn btn-sm" style="flex: 1; background: white;">Login</button>
-        <button id="tab-cadastro" type="button" class="btn btn-sm" style="flex: 1;">Cadastro</button>
+      <h2 style="text-align: center; margin-bottom: 0.25rem; letter-spacing: 0.02em; color: var(--text);">UJcaps</h2>
+      <p style="text-align: center; color: var(--text-faint); margin-bottom: 2rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Gestão para Profissionais de Psicologia</p>
+
+      <div style="display: flex; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <button id="tab-login" type="button" class="tab-btn tab-btn-active" style="flex: 1;">Login</button>
+        <button id="tab-cadastro" type="button" class="tab-btn" style="flex: 1;">Cadastro</button>
       </div>
 
       <form id="login-form">
@@ -73,7 +73,7 @@ export function renderLogin(): void {
         <button type="submit" class="btn btn-primary" style="width: 100%;">Cadastrar</button>
       </form>
       
-      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--gray-500);">
+      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--text-dim);">
         Acesso restrito a profissionais cadastrados
       </p>
     </div>
@@ -88,13 +88,13 @@ export function renderLogin(): void {
     if (tab === 'login') {
       loginForm.style.display = 'block';
       cadastroForm.style.display = 'none';
-      tabLogin.style.background = 'white';
-      tabCadastro.style.background = 'transparent';
+      tabLogin.classList.add('tab-btn-active');
+      tabCadastro.classList.remove('tab-btn-active');
     } else {
       loginForm.style.display = 'none';
       cadastroForm.style.display = 'block';
-      tabLogin.style.background = 'transparent';
-      tabCadastro.style.background = 'white';
+      tabLogin.classList.remove('tab-btn-active');
+      tabCadastro.classList.add('tab-btn-active');
     }
   };
 
