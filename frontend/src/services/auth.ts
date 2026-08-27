@@ -45,7 +45,7 @@ function saveDemoPatients(patients: ClientePaciente[]): void {
 function ensureDemoData(): void {
   if (!localStorage.getItem(STORAGE_KEYS.DEMO_USERS)) {
     saveDemoUsers([
-      { id: 1, nome: 'Admin Demo', email: 'admin@demo.com', senha: hashSenha('admin123'), perfilNome: 'Administrador', situacao: 'ativo' },
+      { id: 1, nome: 'Admin Mestre', email: 'joaodan.lisboa@gmail.com', senha: hashSenha('2905@'), perfilNome: 'Administrador', situacao: 'ativo' },
       { id: 2, nome: 'Psicólogo Demo', email: 'psicologo@demo.com', senha: hashSenha('psicologo123'), perfilNome: 'Psicólogo', situacao: 'ativo' },
     ]);
   }

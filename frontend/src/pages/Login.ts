@@ -60,7 +60,7 @@ export function renderLogin(): void {
         </div>
         <div class="form-group">
           <label for="cad-senha">Senha</label>
-          <input type="password" id="cad-senha" name="senha" required minlength="6" />
+          <input type="password" id="cad-senha" name="senha" required minlength="4" />
         </div>
         <div class="form-group">
           <label for="cad-perfil">Perfil</label>

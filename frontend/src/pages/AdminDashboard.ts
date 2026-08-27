@@ -304,7 +304,7 @@ function openUsuarioModal(id?: number): void {
         ${!id ? `
         <div class="form-group">
           <label for="senha">Senha</label>
-          <input type="password" id="senha" name="senha" required minlength="6" />
+          <input type="password" id="senha" name="senha" required minlength="4" />
         </div>
         ` : ''}
         <div class="form-group">
